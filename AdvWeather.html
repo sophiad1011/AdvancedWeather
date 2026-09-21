@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Columbus Weather App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      background: url('https://source.unsplash.com/1600x900/?weather,sky') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+    }
+    .weather-container {
+      background: rgba(0, 0, 0, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      margin-top: 50px;
+    }
+    .temperature {
+      font-size: 2.5em;
+      color: #ffcc00;
+    }
+    .icon {
+      width: 100px;
+      margin: 20px auto;
+    }
+    .advice {
+      font-size: 1.2em;
+      margin-top: 20px;
+      color: #00ffcc;
+    }
+  </style>
+</head>
+<body>
+  <h1>Weather in Columbus, Ohio</h1>
+  <div class="weather-container">
+    <img src="" alt="Weather Icon" class="icon" id="weather-icon">
+    <p>Current Temperature:</p>
+    <p class="temperature" id="temperature">Loading...</p>
+    <p class="advice" id="advice">Fetching advice...</p>
+  </div>
+
+  <script>
+    // Fetch weather data
+    async function fetchWeather() {
+      const apiUrl = "https://api.open-meteo.com/v1/forecast?latitude=39.96&longitude=-83.00&current_weather=true";
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        const temperature = data.current_weather.temperature;
+        const weatherCode = data.current_weather.weathercode;
+
+        // Display temperature
+        document.getElementById('temperature').textContent = `${temperature}°C`;
+
+        // Set weather icon based on weather code
+        const iconUrl = getWeatherIcon(weatherCode);
+        document.getElementById('weather-icon').src = iconUrl;
+
+        // Display clothing advice
+        const clothingAdvice = getClothingAdvice(temperature, weatherCode);
+        document.getElementById('advice').textContent = clothingAdvice;
+      } catch (error) {
+        console.error("Error fetching weather data:", error);
+        document.getElementById('temperature').textContent = "Unable to load data";
+        document.getElementById('advice').textContent = "Unable to provide advice";
+      }
+    }
+
+    // Function to get weather icon URL based on weather code
+    function getWeatherIcon(code) {
+      const icons = {
+        0: "https://cdn-icons-png.flaticon.com/512/869/869869.png", // Clear sky
+        1: "https://cdn-icons-png.flaticon.com/512/414/414825.png", // Mainly clear
+        2: "https://cdn-icons-png.flaticon.com/512/414/414825.png", // Partly cloudy
+        3: "https://cdn-icons-png.flaticon.com/512/414/414825.png", // Overcast
+        45: "https://cdn-icons-png.flaticon.com/512/3208/3208750.png", // Fog
+        48: "https://cdn-icons-png.flaticon.com/512/3208/3208750.png", // Depositing rime fog
+        51: "https://cdn-icons-png.flaticon.com/512/1163/1163624.png", // Drizzle
+        61: "https://cdn-icons-png.flaticon.com/512/1163/1163624.png", // Rain
+        71: "https://cdn-icons-png.flaticon.com/512/642/642102.png", // Snow
+        95: "https://cdn-icons-png.flaticon.com/512/1146/1146869.png", // Thunderstorm
+      };
+      return icons[code] || "https://cdn-icons-png.flaticon.com/512/869/869869.png"; // Default icon
+    }
+
+    // Function to get clothing advice based on temperature and weather code
+    function getClothingAdvice(temperature, code) {
+      if (temperature > 25) {
+        return "It's hot! Wear light clothing like shorts and a t-shirt.";
+      } else if (temperature > 15) {
+        return "The weather is mild. A light jacket or sweater should be fine.";
+      } else if (temperature > 5) {
+        return "It's a bit chilly. Wear a warm jacket.";
+      } else {
+        return "It's cold! Bundle up with a heavy coat, gloves, and a hat.";
+      }
+    }
+
+    // Call the function on page load
+    fetchWeather();
+  </script>
+</body>
+</html>
